@@ -1,0 +1,37 @@
+[project]
+name = "scansnap-processor"
+version = "1.1.0"
+description = "On-device OCR + smart renaming for image-only ScanSnap PDFs (Apple Vision, local LLM)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Philipp Hauer" }]
+requires-python = ">=3.14"
+classifiers = [
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics :: Capture :: Scanners",
+    "Topic :: Text Processing",
+]
+
+[project.urls]
+Repository = "https://github.com/phauer/scansnap-processor"
+
+# Dependencies are managed in requirements.txt (this is an app, not a library).
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "ocr: runs a real OCR engine (Apple Vision needs a Metal GPU; deselect with -m 'not ocr')",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]  # long literal assertions read better on one line

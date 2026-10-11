@@ -1,0 +1,6 @@
+{
+  "Rechnung": ["RECHNUNG", "Ärztliche", "Z23.8"],
+  "Bußgeldbescheid": ["Bußgeldbescheid", "Verwarnungsgeld", "35,00"],
+  "Umzug": ["Kostenübersicht", "1.234,56"],
+  "SEPA": ["SEPA-Lastschriftmandat", "Gläubiger-Identifikationsnummer"]
+}

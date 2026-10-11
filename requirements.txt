@@ -1,0 +1,18 @@
+# OCR engines (pluggable — see scansnap_ocr/engines/ and OCR_ENGINE in config.py)
+ocrmac>=1.0        # Apple Vision OCR (default engine, macOS only)
+easyocr>=1.7       # fallback engine (cross-platform, CPU)
+# mlx-vlm>=0.1     # optional: Qwen3-VL local VLM engine (large model download)
+
+# Title generation (TITLE_ENGINE=llm, the default): local on-device LLM that reads
+# the OCR text and names the file. macOS/Apple Silicon only; model downloaded on
+# first use (~2 GB). Without it, set TITLE_ENGINE=heuristic (keyword fallback).
+mlx-lm>=0.31       # local LLM titler (Apple Silicon)
+
+pymupdf>=1.27
+pypdf>=6.0
+watchdog>=4.0
+tqdm>=4.0
+
+# dev/test
+pytest>=8.0
+ruff>=0.15

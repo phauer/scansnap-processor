@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template: install-watcher.sh fills in the placeholders and installs the result. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>__LABEL__</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__REPO__/.venv/bin/python</string>
+        <string>__REPO__/watcher.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/watcher-stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/watcher-stderr.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__REPO__/.venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <!-- Release the ~1.7 GB title LLM after each scan (scans are infrequent). -->
+        <key>SCANSNAP_TITLE_RELEASE</key>
+        <string>1</string>
+__EXTRA_ENV__    </dict>
+</dict>
+</plist>
