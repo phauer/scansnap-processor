@@ -58,7 +58,7 @@ The default folder is `~/Documents/ScanSnap Home folder/`; set `SCANSNAP_FOLDER`
 ```bash
 git clone https://github.com/phauer/scansnap-processor.git
 cd scansnap-processor
-python3 -m venv .venv
+/opt/homebrew/opt/python@3.14/bin/python3.14 -m venv .venv  # stable path, survives Homebrew patch upgrades
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -215,6 +215,9 @@ Re-run it whenever you want to change the watcher's settings.
 # Check status
 launchctl list | grep scansnap
 
+# Rebuild the venv after a Homebrew Python upgrade, then restart the watcher
+./rebuild-venv.sh
+
 # Stop
 launchctl stop local.scansnap-ocr
 
@@ -227,7 +230,8 @@ The watcher:
 - Triggers only on new `yyyyMMddHHmmss.pdf` files in the root folder
 - Waits for the file to finish writing before processing
 - Ignores non-PDFs, subdirectories, and already-renamed files
-- Shows macOS notifications on start/finish of processing
+- Shows macOS notifications on start/finish of processing, and when a scan fails
+- Checks at startup that the OCR engine loads. If not (e.g. after a Homebrew Python upgrade broke the venv), it exits, notifies once per hour and launchd keeps retrying. Fix with `./rebuild-venv.sh`
 - Logs to `logs/` in the repo directory
 
 ### Utility scripts (`scripts/`)

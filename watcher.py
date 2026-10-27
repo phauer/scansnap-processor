@@ -46,6 +46,43 @@ def notify(title: str, message: str, reveal_path: Path | None = None) -> None:
         log.debug("Failed to send notification", exc_info=True)
 
 
+ALERT_MARKER = LOG_DIR / ".last-startup-alert"
+ALERT_INTERVAL = 3600.0
+
+
+def self_check() -> None:
+    """Fail fast if the OCR engine can't be loaded (e.g. the venv's Python vanished).
+
+    Without this the watcher stays "running" for launchd and only logs a
+    per-scan error nobody reads. Exiting makes the problem visible, and the
+    notification is rate-limited because KeepAlive restarts the process.
+    """
+    try:
+        from scansnap_ocr.engines import get_engine
+
+        get_engine()
+    except Exception as e:
+        log.error(f"Self-check failed: {e}", exc_info=True)
+        _alert_rate_limited(
+            "ScanSnap OCR is broken", f"{type(e).__name__}: {e}. Run ./rebuild-venv.sh"
+        )
+        sys.exit(1)
+
+
+def _alert_rate_limited(title: str, message: str) -> None:
+    """Notify at most once per ALERT_INTERVAL (marker file survives restarts)."""
+    try:
+        if time.time() - ALERT_MARKER.stat().st_mtime < ALERT_INTERVAL:
+            return
+    except OSError:
+        pass
+    notify(title, message)
+    try:
+        ALERT_MARKER.touch()
+    except OSError:
+        log.debug("Could not write alert marker", exc_info=True)
+
+
 class ScanHandler(FileSystemEventHandler):
     """Handles new PDF files appearing in the ScanSnap folder."""
 
@@ -84,6 +121,7 @@ class ScanHandler(FileSystemEventHandler):
             notify("ScanSnap OCR", f"Done → {new_path.name}", reveal_path=new_path)
         except Exception as e:
             log.error(f"Error processing {path.name}: {e}", exc_info=True)
+            notify("ScanSnap OCR failed", f"{path.name}: {e}")
 
     def _wait_for_stable(self, path: Path, timeout: float = 30.0) -> bool:
         """Wait until a file's size is stable (not being written to)."""
@@ -119,6 +157,8 @@ def main():
     if not folder.exists():
         log.error(f"ScanSnap folder not found: {folder}")
         sys.exit(1)
+
+    self_check()
 
     log.info(f"Watching: {folder}")
     handler = ScanHandler()

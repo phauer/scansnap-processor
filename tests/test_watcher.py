@@ -1,8 +1,12 @@
 """Tests for folder watcher."""
 
+import os
 from unittest.mock import MagicMock, patch
 
-from watcher import ScanHandler
+import pytest
+
+import watcher
+from watcher import ScanHandler, self_check
 
 
 class TestScanHandler:
@@ -98,3 +102,67 @@ class TestWaitForStable:
         handler = ScanHandler()
         result = handler._wait_for_stable(tmp_path / "nonexistent.pdf", timeout=1.0)
         assert result is False
+
+
+class TestFailureNotification:
+    def _event(self, path):
+        event = MagicMock()
+        event.is_directory = False
+        event.src_path = str(path)
+        return event
+
+    def test_notifies_when_processing_fails(self, tmp_path):
+        handler = ScanHandler()
+        pdf_path = tmp_path / "20260328111052.pdf"
+        pdf_path.write_bytes(b"%PDF-1.4 fake")
+
+        with patch.object(handler, "_wait_for_stable", return_value=True), \
+             patch("watcher.process_pdf", side_effect=RuntimeError("boom")), \
+             patch("watcher.notify") as mock_notify, \
+             patch("watcher.SCANSNAP_FOLDER", tmp_path):
+            handler.on_created(self._event(pdf_path))
+
+        title, message = mock_notify.call_args_list[-1].args
+        assert title == "ScanSnap OCR failed"
+        assert "20260328111052.pdf" in message and "boom" in message
+
+
+class TestSelfCheck:
+    @pytest.fixture(autouse=True)
+    def marker(self, tmp_path):
+        with patch("watcher.ALERT_MARKER", tmp_path / ".alert"):
+            yield tmp_path / ".alert"
+
+    def test_passes_when_engine_loads(self):
+        with patch("scansnap_ocr.engines.get_engine"), patch("watcher.notify") as mock_notify:
+            self_check()
+        mock_notify.assert_not_called()
+
+    def test_exits_and_notifies_when_engine_fails(self, marker):
+        with patch("scansnap_ocr.engines.get_engine",
+                   side_effect=ModuleNotFoundError("No module named 'array'")), \
+             patch("watcher.notify") as mock_notify:
+            with pytest.raises(SystemExit) as exc:
+                self_check()
+        assert exc.value.code == 1
+        mock_notify.assert_called_once()
+        assert "array" in mock_notify.call_args.args[1]
+        assert marker.exists()
+
+    def test_alert_is_rate_limited(self, marker):
+        marker.touch()
+        with patch("scansnap_ocr.engines.get_engine", side_effect=RuntimeError("x")), \
+             patch("watcher.notify") as mock_notify:
+            with pytest.raises(SystemExit):
+                self_check()
+        mock_notify.assert_not_called()
+
+    def test_alert_repeats_after_interval(self, marker):
+        marker.touch()
+        old = marker.stat().st_mtime - watcher.ALERT_INTERVAL - 10
+        os.utime(marker, (old, old))
+        with patch("scansnap_ocr.engines.get_engine", side_effect=RuntimeError("x")), \
+             patch("watcher.notify") as mock_notify:
+            with pytest.raises(SystemExit):
+                self_check()
+        mock_notify.assert_called_once()

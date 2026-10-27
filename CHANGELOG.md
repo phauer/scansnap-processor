@@ -7,6 +7,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Watcher startup self-check: exits (and sends a rate-limited notification) if the OCR engine can't load, instead of failing silently on every scan.
+- Watcher sends a notification when processing a scan fails.
+- `rebuild-venv.sh` rebuilds `.venv` on the stable Homebrew Python path and restarts the watcher.
 - Local LLM titler (`mlx-lm`, Qwen2.5-3B) as the default title engine, with the keyword heuristic as automatic fallback.
 - MIT license, CI (lint + non-OCR tests on macOS), `pyproject.toml` with pytest and ruff config.
 - `SCANSNAP_FOLDER` and `SCANSNAP_DOCS_DIR` environment variables (defaults under `~/Documents`).
