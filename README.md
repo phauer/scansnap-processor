@@ -180,6 +180,24 @@ python process_new.py
 
 **Example:** `20260328111052.pdf` → `260317 Deutsche Bank Mitteilung Mandatsreferenz.pdf`
 
+### `photos_to_md.py` — Photo Folder to Markdown
+
+OCR a whole folder of photos (HEIC, JPG, PNG, e.g. pictures of book pages) into one markdown file. Everything runs on-device with the configured OCR engine (Apple Vision by default).
+
+```bash
+# Writes <folder>/<foldername>.md
+python photos_to_md.py ~/Downloads/my-book-photos
+
+# Choose the output file; keep OCR line breaks, one "## <photo>" section per photo
+python photos_to_md.py ~/Downloads/my-book-photos -o book.md --raw
+```
+
+- Photos are processed in filename order (non-recursive); EXIF orientation is honored, and a photo with almost no recognized text is retried rotated by 90/180/270°.
+- By default the text is reflowed: lines are joined into paragraphs, hyphenation breaks are removed, bare page numbers and headers/footers repeated on 3+ pages are dropped, and paragraphs continue across photos.
+- Tunables: `SCANSNAP_PHOTO_MAX_EDGE` (downscale long edge, default 3000) and `SCANSNAP_PHOTO_MIN_CHARS` (rotation-retry threshold, default 30).
+- Exits `1` if the folder is missing or empty, or if any photo failed (the others are still written).
+- Needs `pillow-heif` (in `requirements.txt`) to decode HEIC.
+
 ### `watcher.py` — Folder Watch Daemon
 
 Monitors the ScanSnap folder and auto-processes new scans as they appear. Sends macOS notifications when processing starts and finishes — clicking the "Done" notification reveals the file in Finder.

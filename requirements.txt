@@ -9,6 +9,7 @@ easyocr>=1.7       # fallback engine (cross-platform, CPU)
 mlx-lm>=0.31       # local LLM titler (Apple Silicon)
 
 pymupdf>=1.27
+pillow-heif>=0.18  # HEIC decoding for photos_to_md.py
 pypdf>=6.0
 watchdog>=4.0
 tqdm>=4.0

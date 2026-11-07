@@ -49,6 +49,14 @@ OCR_LANGUAGES = ["de", "en"]
 OCR_DPI = 300
 DPI_SCALE = 72 / OCR_DPI  # Convert pixel coords to PDF points
 
+# Photo folder → markdown (photos_to_md.py)
+PHOTO_EXTENSIONS = {".heic", ".heif", ".jpg", ".jpeg", ".png"}
+# Photos are downscaled so their long edge is at most this many pixels (bounds RAM;
+# Vision does not need more for book/document pages).
+PHOTO_MAX_EDGE = _int_env("SCANSNAP_PHOTO_MAX_EDGE", 3000)
+# A photo with fewer recognized characters than this is retried rotated by 90/180/270°.
+PHOTO_MIN_CHARS = _int_env("SCANSNAP_PHOTO_MIN_CHARS", 30)
+
 # Filename patterns
 NEW_SCAN_PATTERN = re.compile(r"^(\d{14})\.pdf$")
 

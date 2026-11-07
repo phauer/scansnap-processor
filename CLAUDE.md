@@ -26,6 +26,7 @@ scansnap_ocr/
 ├── ocr.py            # Core: PDF → render 300 DPI → OCR engine → invisible text layer
 ├── engines/          # Pluggable OCR backends (apple_vision, easyocr, qwen3vl)
 ├── llm_titler.py     # Local LLM titler (mlx-lm) — reads OCR text → filename title
+├── photos.py         # Photo folder → markdown (HEIC load, line ordering, reflow)
 └── title.py          # Date extraction + title generation (LLM dispatch + heuristic fallback)
 
 scripts/ocr_bench.py          # Benchmark engines on real docs (time + accuracy checkpoints)
@@ -34,6 +35,7 @@ bench-checkpoints.example.json # Checkpoint format; real ones live in gitignored
 
 re_ocr.py                  # CLI: batch re-OCR all existing PDFs (no rename)
 process_new.py             # CLI: OCR + rename single/all new scans
+photos_to_md.py            # CLI: OCR a folder of photos (HEIC/JPG/PNG) into one markdown file
 watcher.py                 # Folder watch daemon (watchdog)
 launchagent.plist.template # macOS LaunchAgent template (label local.scansnap-ocr)
 install-watcher.sh         # Fills the template (repo path + SCANSNAP_* env), installs + loads it
