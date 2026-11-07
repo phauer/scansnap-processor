@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
-- `photos_to_md.py`: OCR a folder of photos (HEIC/JPG/PNG) into a single reflowed markdown file (`--raw` keeps line breaks).
+- `photos_to_md.py`: OCR a folder of photos (HEIC/JPG/PNG) into a single reflowed markdown file (`--raw` keeps line breaks). Numbered headings become markdown headings, a table of contents becomes a clean nested list, and tables become markdown tables (`--no-tables` disables).
 - Watcher startup self-check: exits (and sends a rate-limited notification) if the OCR engine can't load, instead of failing silently on every scan.
 - Watcher sends a notification when processing a scan fails.
 - `rebuild-venv.sh` rebuilds `.venv` on the stable Homebrew Python path and restarts the watcher.

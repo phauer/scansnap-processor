@@ -190,10 +190,16 @@ python photos_to_md.py ~/Downloads/my-book-photos
 
 # Choose the output file; keep OCR line breaks, one "## <photo>" section per photo
 python photos_to_md.py ~/Downloads/my-book-photos -o book.md --raw
+
+# Keep table rows as plain text lines
+python photos_to_md.py ~/Downloads/my-book-photos --no-tables
 ```
 
 - Photos are processed in filename order (non-recursive); EXIF orientation is honored, and a photo with almost no recognized text is retried rotated by 90/180/270°.
-- By default the text is reflowed: lines are joined into paragraphs, hyphenation breaks are removed, bare page numbers and headers/footers repeated on 3+ pages are dropped, and paragraphs continue across photos.
+- By default the text is reflowed: lines are joined into paragraphs, hyphenation breaks are removed, bare page numbers and running headers/footers are dropped (a line that opens or closes 3+ pages, with or without an attached page number or `|`, e.g. `36 | 3 Chapter Title`; the first undecorated occurrence is kept as the chapter's real heading), and paragraphs continue across photos.
+- Numbered headings (`3 Title`, `3.18 Title`, `3.1.2 Title`) become markdown headings (`##`, `###`, `####`). Table-of-contents entries (ending in a page number or dot leader) are skipped. Unnumbered headings are not detected, because photo box heights are too noisy to tell them apart.
+- A table of contents (starting at a line "Inhaltsverzeichnis", continuing while the pages look like TOC pages) is rendered as a nested list following the number depth, without page numbers. Dot leaders, margin tab numbers and detached page numbers are removed, and entry numbers are checked against the sequence (a detached or misread number is repaired from the surrounding entries).
+- Tables are detected geometrically (Vision returns each cell as its own box): runs of rows made of several short boxes with at least two numeric cells become markdown tables. Numeric columns are right-aligned, stacked header rows and wrapped row labels are merged, rows split by photo perspective are rejoined, and a table continuing at the top of the next photo is merged into the previous one. Two-column prose and text-only label/value rows are left alone. Use `--no-tables` to switch this off.
 - Tunables: `SCANSNAP_PHOTO_MAX_EDGE` (downscale long edge, default 3000) and `SCANSNAP_PHOTO_MIN_CHARS` (rotation-retry threshold, default 30).
 - Exits `1` if the folder is missing or empty, or if any photo failed (the others are still written).
 - Needs `pillow-heif` (in `requirements.txt`) to decode HEIC.

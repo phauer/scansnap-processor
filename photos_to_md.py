@@ -17,6 +17,8 @@ def main(argv=None) -> int:
                         help="Output file (default: <folder>/<foldername>.md)")
     parser.add_argument("--raw", action="store_true",
                         help="Keep OCR line breaks, one '## <photo>' section per photo")
+    parser.add_argument("--no-tables", action="store_true",
+                        help="Do not detect tables (keep table rows as plain text lines)")
     args = parser.parse_args(argv)
 
     folder = args.folder.expanduser().resolve()
@@ -38,7 +40,10 @@ def main(argv=None) -> int:
             failures.append(photo.name)
 
     output = args.output or folder / f"{folder.name}.md"
-    output.write_text(build_markdown(folder.name, names, pages, raw=args.raw), encoding="utf-8")
+    markdown = build_markdown(
+        folder.name, names, pages, raw=args.raw, tables=not args.no_tables
+    )
+    output.write_text(markdown, encoding="utf-8")
     print(f"Wrote {output} ({len(pages)}/{len(photos)} photos)")
     if failures:
         print(f"{len(failures)} failed: {', '.join(failures)}", file=sys.stderr)
